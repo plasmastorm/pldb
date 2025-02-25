@@ -1,0 +1,26 @@
+services:
+    web:
+        image: playlistdb/php
+        build: ./
+        volumes:
+            - ./html:/var/www/html
+        ports:
+            - 8080:80
+        networks:
+            - backend
+
+    db:
+        image: mariadb:11
+        volumes:
+            - ./initdb.d:/docker-entrypoint-initdb.d
+            - ./database:/var/lib/mysql
+        environment:
+            MARIADB_RANDOM_ROOT_PASSWORD: true
+            MARIADB_DATABASE: pldb
+            MARIADB_USER: pldb
+            MARIADB_PASSWORD: changeme
+        networks:
+            - backend
+          
+networks:
+    backend:
