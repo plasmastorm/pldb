@@ -21,6 +21,15 @@ services:
             MARIADB_PASSWORD: changeme
         networks:
             - backend
+
+    phpmyadmin:
+        image: phpmyadmin:5.2.2
+        ports:
+            - 8081:80
+        environment:
+            PMA_HOST: db
+        networks:
+            - backend
           
 networks:
     backend:
