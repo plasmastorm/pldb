@@ -15,10 +15,10 @@ $show = $_GET['show'] ?? 1;
 require(__DIR__.'/templates/header.php');
 ?>
 <div class="col d-flex justify-content-center">
-    <div class="card">
+    <div class="card p-3">
         <div class="text-center">
-            <h3>Shows</h3>
-            <form action="index.php" method="GET">
+
+            <form action="index.php" method="GET" class="p-4">
 
                 <label for="show">Choose a show:</label>
 
@@ -34,19 +34,32 @@ require(__DIR__.'/templates/header.php');
                 </select> 
                 <input type="submit" value="Go!">
             </form>
+            <h3 class="p-2">Show 
+            <?php
+                    $query = "SELECT * FROM shows where id = '$show'";
+                    $result = $conn->query($query);
+                    
+                    while ($row = $result->fetch_assoc()) {
+                        echo '#' . $row['id'] . ' - ' . $row['theme'] . ' - ' . $row['airdate'];
+                    }
+                    ?>
+            </h3>
+            <iframe  scrolling="no" loading="lazy" src="https://faircamp.internetstuff.co.uk/bootlegs/embed/4/" style="min-width: 800px;height:55px;" title="Audio player widget for &quot;Kyuss - Demon Cleaner (Heapy&#39;s Nu Skool Breaks Bootleg)&quot;"></iframe>
+
             <div>
-                <table class="table table-dark">
-                    <tr>
-                        <th>Artist</th>
-                        <th>Track</th>
-                        <th>Length</th>
-                        <th>Requested By</th>
-                    </tr>
-
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Artist</th>
+                            <th>Title</th>
+                            <th>Year</th>
+                            <th>Requested By</th>
+                            <th>Comment</th>
+                        </tr>
+                    </thead>
                 <?php
-
-                    $query = "
-                        SELECT artists.name AS artist, artists.link, tracks.name, tracks.length, suggesters.handle
+                    $query = '
+                        SELECT artists.name AS artist, tracks.title, tracks.year, suggesters.handle, comment
                         FROM plays
                             INNER JOIN tracks
                                 ON track_id = tracks.id
@@ -54,21 +67,19 @@ require(__DIR__.'/templates/header.php');
                                 ON suggester_id = suggesters.id
                             INNER JOIN artists
                                 ON tracks.artist_id = artists.id 
-                        WHERE show_id = '$show'
-                        ";
+                        WHERE show_id = ' . $show;
                     $result = $conn->query($query);
 
                     while ($row = $result->fetch_assoc()) {
                         echo '<tr>';
-                        echo '<td><a href="' . $row['link'] . '">' . $row['artist'] . '</a></td>';
-                        echo '<td>' . $row['name'] . '</td>';
-                        echo '<td>' . $row['length'] . '</td>';
+                        echo '<td>' . $row['artist'] . '</td>';
+                        echo '<td>' . $row['title'] . '</td>';
+                        echo '<td>' . $row['year'] . '</td>';
                         echo '<td>' . $row['handle'] . '</td>';
+                        echo '<td>' . $row['comment'] . '</td>';
                         echo '</tr>';
                     }
                 ?>
-
-
                 </table>
             </div>
         </div>

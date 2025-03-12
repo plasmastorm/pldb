@@ -7,6 +7,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   </head>
 <body>
-  <div class="jumbotron text-center">
-    <h2>The Playlist Database</h2>
+  <div class="jumbotron text-center p-3">
+    <h2>#ThePlaylist Database</h2>
   </div>

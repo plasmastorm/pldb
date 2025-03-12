@@ -1,22 +1,23 @@
 CREATE TABLE artists (
     id int NOT NULL AUTO_INCREMENT,
     name varchar(255),
-    link varchar(255),
     PRIMARY KEY (id)
 );
 
 CREATE TABLE tracks (
     id int NOT NULL AUTO_INCREMENT,
-    name varchar(255),
+    title varchar(255),
     artist_id int,
-    length time,
+    year int,
     PRIMARY KEY (id)
 );
 
 CREATE TABLE shows (
-    id int NOT NULL AUTO_INCREMENT,
+    id int NOT NULL,
     theme varchar(255),
     airdate date,
+    published boolean,
+    archivelink varchar(255),
     PRIMARY KEY (id)
 );
 
@@ -31,5 +32,6 @@ CREATE TABLE plays (
     show_id int,
     track_id int,
     suggester_id int,
+    comment varchar(255),
     PRIMARY KEY (id)
 );
