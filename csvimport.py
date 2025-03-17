@@ -30,6 +30,7 @@ def sqlSelectOne(sql):
 
 def sqlInsert(sql):
     """ add a new entry """
+    # Show what we're doing
     print(sql)
     mycursor = mydb.cursor(buffered=True)
     mycursor.execute(sql)
@@ -49,13 +50,15 @@ with open(csvfile, "r") as f:
     reader = csv.DictReader(f, fieldnames=['artist', 'title', 'year', 'suggester', 'comment'])
     for row in reader:
 
+
+        # Add artist to db if it doesn't exist
         artistId = sqlSelectOne(f"SELECT id FROM artists WHERE name = \"{row["artist"]}\"")
-        
         if artistId is None:
             sqlInsert(f"INSERT INTO artists (name) VALUES (\"{row["artist"].strip()}\")")
             artistId = sqlSelectOne(f"SELECT id FROM artists WHERE name = \"{row["artist"]}\"")
 
 
+        # Add track to db if it doesn't exist
         trackId = sqlSelectOne(f"SELECT id FROM tracks WHERE title = \"{row["title"].strip()}\" AND artist_id = {artistId[0]}") 
         if trackId is None:
             year = "Null"
@@ -68,12 +71,14 @@ with open(csvfile, "r") as f:
             trackId = sqlSelectOne(f"SELECT id FROM tracks WHERE title = \"{row["title"].strip()}\" AND artist_id = {artistId[0]}") 
 
 
+        # Add suggester to db if they don't exist
         suggesterId = sqlSelectOne(f"SELECT id FROM suggesters WHERE LOWER(handle) like LOWER(\"{row["suggester"].strip()}%\")")
         if suggesterId is None:
             sqlInsert(f"INSERT INTO suggesters (handle) VALUES (\"{row["suggester"].strip()}\")")
             suggesterId = sqlSelectOne(f"SELECT id FROM suggesters WHERE LOWER(handle) like LOWER(\"{row["suggester"].strip()}%\")")
 
 
+        # Only quote comment if it exists
         comment = "Null"
         try:
             comment = str(row['comment'].strip())
@@ -83,6 +88,7 @@ with open(csvfile, "r") as f:
             comment = f'\"{comment}\"'
 
 
+        # Add play to db if it doesn't exist
         if sqlSelectOne(f"SELECT id FROM plays WHERE show_id = {show} AND track_id = {trackId[0]} AND suggester_id = {suggesterId[0]}"):
             print("Play already exists")
         else:
