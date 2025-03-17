@@ -7,11 +7,10 @@ import sys
 import csv
 import mysql.connector
 
-
-# check cli args
 show = sys.argv[1]
 airdate = sys.argv[2]
 csvfile = sys.argv[3]
+
 
 mydb = mysql.connector.connect(
   host="localhost",
@@ -21,11 +20,13 @@ mydb = mysql.connector.connect(
   ssl_disabled=True
 )
 
+
 def sqlSelectOne(sql):
     """ return one enttry from select style query """
     mycursor = mydb.cursor(buffered=True)
     mycursor.execute(sql)
     return mycursor.fetchone()
+
 
 def sqlInsert(sql):
     """ add a new entry """
@@ -42,6 +43,7 @@ else:
     theme = input("What was the theme? ")
     sqlInsert(f"INSERT INTO shows (id, theme, airdate) VALUES (\"{show}\", \"{theme}\", \"{airdate}\")")
 
+
 # read the csv into memory
 with open(csvfile, "r") as f:
     reader = csv.DictReader(f, fieldnames=['artist', 'title', 'year', 'suggester', 'comment'])
@@ -52,6 +54,7 @@ with open(csvfile, "r") as f:
         if artistId is None:
             sqlInsert(f"INSERT INTO artists (name) VALUES (\"{row["artist"].strip()}\")")
             artistId = sqlSelectOne(f"SELECT id FROM artists WHERE name = \"{row["artist"]}\"")
+
 
         trackId = sqlSelectOne(f"SELECT id FROM tracks WHERE title = \"{row["title"].strip()}\" AND artist_id = {artistId[0]}") 
         if trackId is None:
@@ -64,10 +67,12 @@ with open(csvfile, "r") as f:
             sqlInsert(f"INSERT INTO tracks (title, artist_id, year) VALUES (\"{row["title"].strip()}\", {artistId[0]}, {year})")
             trackId = sqlSelectOne(f"SELECT id FROM tracks WHERE title = \"{row["title"].strip()}\" AND artist_id = {artistId[0]}") 
 
+
         suggesterId = sqlSelectOne(f"SELECT id FROM suggesters WHERE LOWER(handle) like LOWER(\"{row["suggester"].strip()}%\")")
         if suggesterId is None:
             sqlInsert(f"INSERT INTO suggesters (handle) VALUES (\"{row["suggester"].strip()}\")")
             suggesterId = sqlSelectOne(f"SELECT id FROM suggesters WHERE LOWER(handle) like LOWER(\"{row["suggester"].strip()}%\")")
+
 
         comment = "Null"
         try:
@@ -76,6 +81,7 @@ with open(csvfile, "r") as f:
             print("No comment found, continuing")
         if comment != "Null":
             comment = f'\"{comment}\"'
+
 
         if sqlSelectOne(f"SELECT id FROM plays WHERE show_id = {show} AND track_id = {trackId[0]} AND suggester_id = {suggesterId[0]}"):
             print("Play already exists")
