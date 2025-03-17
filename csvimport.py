@@ -84,6 +84,8 @@ with open(csvfile, "r") as f:
             comment = str(row['comment'].strip())
         except:
             print("No comment found, continuing")
+        if comment == "":
+            comment = "Null"
         if comment != "Null":
             comment = f'\"{comment}\"'
 
