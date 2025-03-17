@@ -52,14 +52,14 @@ with open(csvfile, "r") as f:
 
 
         # Add artist to db if it doesn't exist
-        artistId = sqlSelectOne(f"SELECT id FROM artists WHERE name = \"{row["artist"]}\"")
+        artistId = sqlSelectOne(f"SELECT id FROM artists WHERE LOWER(name) = LOWER(\"{row["artist"]}\")")
         if artistId is None:
             sqlInsert(f"INSERT INTO artists (name) VALUES (\"{row["artist"].strip()}\")")
-            artistId = sqlSelectOne(f"SELECT id FROM artists WHERE name = \"{row["artist"]}\"")
+            artistId = sqlSelectOne(f"SELECT id FROM artists WHERE LOWER(name) = LOWER(\"{row["artist"]}\")")
 
 
         # Add track to db if it doesn't exist
-        trackId = sqlSelectOne(f"SELECT id FROM tracks WHERE title = \"{row["title"].strip()}\" AND artist_id = {artistId[0]}") 
+        trackId = sqlSelectOne(f"SELECT id FROM tracks WHERE LOWER(title) = LOWER(\"{row["title"].strip()}\") AND artist_id = {artistId[0]}") 
         if trackId is None:
             year = "Null"
             try:
@@ -68,7 +68,7 @@ with open(csvfile, "r") as f:
                 print("No year found, continuing")
 
             sqlInsert(f"INSERT INTO tracks (title, artist_id, year) VALUES (\"{row["title"].strip()}\", {artistId[0]}, {year})")
-            trackId = sqlSelectOne(f"SELECT id FROM tracks WHERE title = \"{row["title"].strip()}\" AND artist_id = {artistId[0]}") 
+            trackId = sqlSelectOne(f"SELECT id FROM tracks WHERE LOWER(title) = LOWER(\"{row["title"].strip()}\") AND artist_id = {artistId[0]}") 
 
 
         # Add suggester to db if they don't exist
