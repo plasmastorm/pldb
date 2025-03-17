@@ -22,7 +22,7 @@ mydb = mysql.connector.connect(
 )
 
 def sqlSelectOne(sql):
-    """ check if an entry exists """
+    """ return one enttry from select style query """
     mycursor = mydb.cursor(buffered=True)
     mycursor.execute(sql)
     return mycursor.fetchone()
@@ -36,8 +36,8 @@ def sqlInsert(sql):
 
 
 if sqlSelectOne(f"SELECT id FROM shows where id = {show}"):
-    print("Show exists, quitting")
-    sys.exit(1)
+    theme = sqlSelectOne(f"SELECT theme FROM shows where id = {show}")
+    print(f"Show exists with theme {theme[0]}")
 else:
     theme = input("What was the theme? ")
     sqlInsert(f"INSERT INTO shows (id, theme, airdate) VALUES (\"{show}\", \"{theme}\", \"{airdate}\")")
@@ -77,4 +77,8 @@ with open(csvfile, "r") as f:
         if comment != "Null":
             comment = f'\"{comment}\"'
 
-        sqlInsert(f"INSERT INTO plays (show_id, track_id, suggester_id, comment) VALUES ({show}, {trackId[0]}, {suggesterId[0]}, {comment})")
+        if sqlSelectOne(f"SELECT id FROM plays WHERE show_id = {show} AND track_id = {trackId[0]} AND suggester_id = {suggesterId[0]}"):
+            print("Play already exists")
+        else:
+            sqlInsert(f"INSERT INTO plays (show_id, track_id, suggester_id, comment) VALUES ({show}, {trackId[0]}, {suggesterId[0]}, {comment})")
+
