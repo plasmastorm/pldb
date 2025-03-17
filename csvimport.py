@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-# quick and dirty csv importer just to get us off the ground
-# sql var safety and error handling is for wimps
+# Quick and dirty csv importer just to get us off the ground
+# SQL var safety and error handling is for wimps. Bodges galore, don't @ me!
 
 import sys
 import csv
@@ -21,56 +21,60 @@ mydb = mysql.connector.connect(
   ssl_disabled=True
 )
 
-def matchEntry(table, matcher, entry):
+def sqlSelectOne(sql):
     """ check if an entry exists """
-
-    mycursor = mydb.cursor()
-    mycursor.execute(f"SELECT id FROM {table} WHERE {matcher} = '{entry}'")
+    mycursor = mydb.cursor(buffered=True)
+    mycursor.execute(sql)
     return mycursor.fetchone()
 
-def addEntry(table, values):
+def sqlInsert(sql):
     """ add a new entry """
-    print(f"INSERT INTO {table} ({', '.join(values.keys())}) VALUES ({', '.join(values.values())})")
-    mycursor = mydb.cursor()
-    mycursor.execute(f"INSERT INTO {table} ({', '.join(values.keys())}) VALUES (\"{'\", \"'.join(values.values())}\")")
+    print(sql)
+    mycursor = mydb.cursor(buffered=True)
+    mycursor.execute(sql)
     mydb.commit()
 
-#print("shows", "id", show)
-#if matchEntry("shows", "id", show):
-#    print("Show exists, quitting")
-#    sys.exit(1)
-#else:
-#    theme = input("What was the theme? ")
-#    addEntry("shows", {"id": show, "theme": theme, "airdate": airdate})
 
-
+if sqlSelectOne(f"SELECT id FROM shows where id = {show}"):
+    print("Show exists, quitting")
+    sys.exit(1)
+else:
+    theme = input("What was the theme? ")
+    sqlInsert(f"INSERT INTO shows (id, theme, airdate) VALUES (\"{show}\", \"{theme}\", \"{airdate}\")")
 
 # read the csv into memory
 with open(csvfile, "r") as f:
     reader = csv.DictReader(f, fieldnames=['artist', 'title', 'year', 'suggester', 'comment'])
     for row in reader:
 
-        artistId = matchEntry("artists", "name", row["artist"])
-        print(artistId)
+        artistId = sqlSelectOne(f"SELECT id FROM artists WHERE name = \"{row["artist"]}\"")
+        
         if artistId is None:
-          addEntry("artists", {"name": row["artist"].strip()})
-          artistId = matchEntry("artists", "name", row["artist"])
+            sqlInsert(f"INSERT INTO artists (name) VALUES (\"{row["artist"].strip()}\")")
+            artistId = sqlSelectOne(f"SELECT id FROM artists WHERE name = \"{row["artist"]}\"")
 
-        trackId = matchEntry("tracks", "title", row["title"]) # match against the artist too!!!!!
+        trackId = sqlSelectOne(f"SELECT id FROM tracks WHERE title = \"{row["title"].strip()}\" AND artist_id = {artistId[0]}") 
         if trackId is None:
-          addEntry("tracks", {"title": row["title"].strip(), "artist_id": str(artistId[0])})
-          trackId = matchEntry("tracks", "title", row["title"]) # and here!
+            year = "Null"
+            try:
+                year = int(row["year"].strip())
+            except:
+                print("No year found, continuing")
 
-  # for each track
-    # if it doesn't exist in the tracks table
-      # add it to the table (including year)
-    # replace track name with id
+            sqlInsert(f"INSERT INTO tracks (title, artist_id, year) VALUES (\"{row["title"].strip()}\", {artistId[0]}, {year})")
+            trackId = sqlSelectOne(f"SELECT id FROM tracks WHERE title = \"{row["title"].strip()}\" AND artist_id = {artistId[0]}") 
 
-  # for each suggester
-    # if it doesn't exist in the suggesters table
-      # add it to the table
-    # replace suggester name with id
+        suggesterId = sqlSelectOne(f"SELECT id FROM suggesters WHERE LOWER(handle) like LOWER(\"{row["suggester"].strip()}%\")")
+        if suggesterId is None:
+            sqlInsert(f"INSERT INTO suggesters (handle) VALUES (\"{row["suggester"].strip()}\")")
+            suggesterId = sqlSelectOne(f"SELECT id FROM suggesters WHERE LOWER(handle) like LOWER(\"{row["suggester"].strip()}%\")")
 
+        comment = "Null"
+        try:
+            comment = str(row['comment'].strip())
+        except:
+            print("No comment found, continuing")
+        if comment != "Null":
+            comment = f'\"{comment}\"'
 
-
-  # add resulting to plays table
+        sqlInsert(f"INSERT INTO plays (show_id, track_id, suggester_id, comment) VALUES ({show}, {trackId[0]}, {suggesterId[0]}, {comment})")
