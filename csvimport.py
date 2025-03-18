@@ -65,7 +65,7 @@ with open(csvfile, "r") as f:
             try:
                 year = int(row["year"].strip())
             except:
-                print("No year found, continuing")
+                pass
 
             sqlInsert(f"INSERT INTO tracks (title, artist_id, year) VALUES (\"{row["title"].strip()}\", {artistId[0]}, {year})")
             trackId = sqlSelectOne(f"SELECT id FROM tracks WHERE LOWER(title) = LOWER(\"{row["title"].strip()}\") AND artist_id = {artistId[0]}") 
@@ -83,7 +83,7 @@ with open(csvfile, "r") as f:
         try:
             comment = str(row['comment'].strip())
         except:
-            print("No comment found, continuing")
+            pass
         if comment == "":
             comment = "Null"
         if comment != "Null":
