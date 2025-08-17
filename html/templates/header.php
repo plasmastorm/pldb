@@ -10,3 +10,6 @@
   <div class="jumbotron text-center p-3">
     <h2>#ThePlaylist Database</h2>
   </div>
+  <div class="text-center">
+    Catch #ThePlaylist every Monday at 7pm UK time at <a href="https://stream.djdarren.site">DJ Darren's Site</a>
+  </div>

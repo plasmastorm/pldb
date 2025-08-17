@@ -44,8 +44,6 @@ require(__DIR__.'/templates/header.php');
                     }
                     ?>
             </h3>
-            <iframe  scrolling="no" loading="lazy" src="https://faircamp.internetstuff.co.uk/bootlegs/embed/4/" style="min-width: 800px;height:55px;" title="Audio player widget for &quot;Kyuss - Demon Cleaner (Heapy&#39;s Nu Skool Breaks Bootleg)&quot;"></iframe>
-
             <div>
                 <table class="table">
                     <thead class="thead-dark">
