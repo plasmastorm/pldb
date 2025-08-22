@@ -10,17 +10,17 @@ services:
             - backend
 
     db:
-        image: mariadb:11
+        image: mysql:8.0
         ports:
             - "3306:3306"
         volumes:
             - ./initdb.d:/docker-entrypoint-initdb.d
             - ./database:/var/lib/mysql
         environment:
-            MARIADB_RANDOM_ROOT_PASSWORD: true
-            MARIADB_DATABASE: pldb
-            MARIADB_USER: pldb
-            MARIADB_PASSWORD: changeme
+            MYSQL_RANDOM_ROOT_PASSWORD: true
+            MYSQL_DATABASE: pldb
+            MYSQL_USER: pldb
+            MYSQL_PASSWORD: changeme
         networks:
             - backend
 
