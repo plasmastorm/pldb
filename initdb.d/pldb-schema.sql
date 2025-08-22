@@ -11,7 +11,7 @@ CREATE TABLE tracks (
     artist_id int,
     year int,
     PRIMARY KEY (id),
-    KEY ind_artist (artist_id)
+    UNIQUE KEY (artist_id, title)
 );
 
 CREATE TABLE shows (
