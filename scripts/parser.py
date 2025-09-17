@@ -1,8 +1,15 @@
 #!/usr/bin/env python3
 
+import sys
 import csv
 import mysql.connector
 import pldb_mysql
+
+# Usage: python parser.py playlistfilename.csv
+
+file = sys.argv[1]
+if file is None:
+    sys.exit("Please specify a file to parse.")
 
 # db connection
 mydb = mysql.connector.connect(
@@ -17,12 +24,11 @@ mycursor = mydb.cursor(buffered=True)
 
 # get list of shows and artists
 shows = pldb_mysql.get_all_shows_by_theme(mycursor)
-# print(shows)
 
 # DictReader reads the first row as column names
 # Episode No.,Date Played,Show Title,Artist,Title,Year,Suggested By 1,Suggested By 2,Suggested By 3,Notes
 
-with open('theplaylist-2025-08-16.csv', newline='') as csvfile:
+with open(file, newline='') as csvfile:
     trackreader = csv.DictReader(csvfile)
     for row in trackreader:
         # ignore empty rows
@@ -54,7 +60,6 @@ with open('theplaylist-2025-08-16.csv', newline='') as csvfile:
             try:
                 mycursor.execute(artistInsert, (artist,))
                 mydb.commit()
-                print("last row id: " + str(mycursor.lastrowid))
                 artist_id = mycursor.lastrowid
             except mysql.connector.IntegrityError as e:
                 print("Error: {}".format(e))
@@ -69,11 +74,9 @@ with open('theplaylist-2025-08-16.csv', newline='') as csvfile:
             year = None
             if isinstance(row['Year'], int):
                 year = row['Year']
-                print("Year: " + str(year))
             try:
                 mycursor.execute(track_insert, (row['Title'], artist_id, year))
                 mydb.commit()
-                print("tracks last row id: " + str(mycursor.lastrowid))
                 track_id = mycursor.lastrowid
             except mysql.connector.IntegrityError as e:
                 print("Error: {}".format(e))
@@ -84,11 +87,10 @@ with open('theplaylist-2025-08-16.csv', newline='') as csvfile:
         # plays
         # get suggesters
         suggesters = " ".join([row['Suggested By 1'], row['Suggested By 2'], row['Suggested By 3']]).strip()
-        print(suggesters)
+        
         try:
-            pldb_mysql.insert_play(mycursor, show_id, track_id, suggesters)
+            pldb_mysql.insert_play(mycursor, show_id, track_id, suggesters, row['Notes'])
             mydb.commit()
-            print("plays last row id: " + str(mycursor.lastrowid))
         except mysql.connector.IntegrityError as e:
             print("Error: {}".format(e))
             if e.args[0] != 1062:

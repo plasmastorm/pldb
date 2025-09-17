@@ -61,11 +61,11 @@ def get_play_id_from_show_id_and_track_id(mycursor, show_id, track_id):
     return result
 
 # insert new play row if it doesn't exist 
-def insert_play(mycursor, show_id, track_id, suggesters):
+def insert_play(mycursor, show_id, track_id, suggesters, comment):
     result = get_play_id_from_show_id_and_track_id(mycursor, show_id, track_id)
     if result is None:
-        query = "INSERT INTO plays (show_id, track_id, suggesters) VALUES (%s, %s, %s)"
-        mycursor.execute(query, (show_id, track_id, suggesters))
+        query = "INSERT INTO plays (show_id, track_id, suggesters, comment) VALUES (%s, %s, %s, %s)"
+        mycursor.execute(query, (show_id, track_id, suggesters, comment))
         result = mycursor.lastrowid
     return result
 
