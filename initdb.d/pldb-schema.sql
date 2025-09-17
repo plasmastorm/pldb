@@ -35,12 +35,13 @@ CREATE TABLE suggesters (
 
 CREATE TABLE plays (
     id int NOT NULL AUTO_INCREMENT,
-    show_id int,
-    track_id int,
-    suggester_id int,
-    comment varchar(255),
+    show_id int DEFAULT NULL,
+    track_id int DEFAULT NULL,
+    suggester_id int DEFAULT NULL,
+    suggesters varchar(255) DEFAULT NULL,
+    comment varchar(255) DEFAULT NULL,
     PRIMARY KEY (id),
-    UNIQUE KEY ind_show_track (show_id, track_id),
+    UNIQUE KEY ind_show_track (show_id,track_id),
     KEY ind_track (track_id),
-    KEY ind_suggester (suggester_id)
+    KEY ind_suggesters (suggesters)
 );

@@ -20,7 +20,7 @@ shows = pldb_mysql.get_all_shows_by_theme(mycursor)
 # print(shows)
 
 # DictReader reads the first row as column names
-# Episode No.,Date Played,Show Title,Artist,Title,Year,Suggested By,Suggested By,Suggested By,Notes
+# Episode No.,Date Played,Show Title,Artist,Title,Year,Suggested By 1,Suggested By 2,Suggested By 3,Notes
 
 with open('theplaylist-2025-08-16.csv', newline='') as csvfile:
     trackreader = csv.DictReader(csvfile)
@@ -67,8 +67,9 @@ with open('theplaylist-2025-08-16.csv', newline='') as csvfile:
         if not isinstance(track_id, int):
             track_insert = "INSERT INTO tracks (title, artist_id, year) VALUES (%s, %s, %s)"
             year = None
-            if row['Year'] != '':
+            if isinstance(row['Year'], int):
                 year = row['Year']
+                print("Year: " + str(year))
             try:
                 mycursor.execute(track_insert, (row['Title'], artist_id, year))
                 mydb.commit()
@@ -79,19 +80,15 @@ with open('theplaylist-2025-08-16.csv', newline='') as csvfile:
                 if e.args[0] != 1062:
                     mydb.rollback()
                     continue
-
-        # suggesters
-        # note there may be 3...
-        suggested_handle1 = row['Suggested By1']
-        suggested_handle2 = row['Suggested By2']
-        suggested_handle3 = row['Suggested By3']
         
+        # plays
+        # get suggesters
+        suggesters = " ".join([row['Suggested By 1'], row['Suggested By 2'], row['Suggested By 3']]).strip()
+        print(suggesters)
         try:
-            suggested_id1 = pldb_mysql.insert_suggester_by_handle(mycursor, suggested_handle1)
-            suggested_id2 = pldb_mysql.insert_suggester_by_handle(mycursor, suggested_handle2)
-            suggested_id3 = pldb_mysql.insert_suggester_by_handle(mycursor, suggested_handle3)
+            pldb_mysql.insert_play(mycursor, show_id, track_id, suggesters)
             mydb.commit()
-            print("suggester last row ids: " + str(suggested_id1) + " " + str(suggested_id2) + " " + str(suggested_id3))
+            print("plays last row id: " + str(mycursor.lastrowid))
         except mysql.connector.IntegrityError as e:
             print("Error: {}".format(e))
             if e.args[0] != 1062:
