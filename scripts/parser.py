@@ -53,6 +53,9 @@ with open(file, newline='') as csvfile:
                     continue
         # TODO: add else if show id and theme don't match?
 
+        # get artist details
+        if row['Artist'] == "":
+            continue
         artist = row['Artist'].strip()
         artist_id = pldb_mysql.get_artist_id_by_name(mycursor, artist)
         if not isinstance(artist_id, int):
