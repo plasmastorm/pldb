@@ -9,6 +9,29 @@ services:
         networks:
             - backend
 
+    wp:
+        image: playlistdb/php
+        build: ./
+        volumes:
+            - ./wordpress:/var/www/html
+            - ./wp-plugin:/var/www/html/wp-content/plugins/pldb
+        ports:
+            - 8082:80
+        networks:
+            - backend
+
+    wpdb:
+        image: mysql:8.0
+        volumes:
+            - ./wpdb:/var/lib/mysql
+        environment:
+            MYSQL_RANDOM_ROOT_PASSWORD: true
+            MYSQL_DATABASE: wpdb
+            MYSQL_USER: wpdb
+            MYSQL_PASSWORD: changeme
+        networks:
+            - backend
+
     db:
         image: mysql:8.0
         ports:
@@ -21,6 +44,7 @@ services:
             MYSQL_DATABASE: pldb
             MYSQL_USER: pldb
             MYSQL_PASSWORD: changeme
+        command: --default-authentication-plugin=mysql_native_password
         networks:
             - backend
 

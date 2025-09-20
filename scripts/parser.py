@@ -14,10 +14,11 @@ if file is None:
 # db connection
 mydb = mysql.connector.connect(
   host="127.0.0.1",
-  port=8034,
-  user="msandbox",
-  password="msandbox",
-  database="pldb"
+  port=3306,
+  user="pldb",
+  password="changeme",
+  database="pldb",
+  ssl_disabled=True
 )
 
 mycursor = mydb.cursor(buffered=True)
