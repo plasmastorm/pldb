@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+## #!/usr/bin/env python3
 
 import sys
 import csv
@@ -22,11 +22,12 @@ mydb = mysql.connector.connect(
 
 mycursor = mydb.cursor(buffered=True)
 
+
 # get list of shows and artists
 shows = pldb_mysql.get_all_shows_by_theme(mycursor)
 
 # DictReader reads the first row as column names
-# Episode No.,Date Played,Show Title,Artist,Title,Year,Suggested By 1,Suggested By 2,Suggested By 3,Notes
+# Episode No.,Date Played,Show Title,Artist,Title,Year,Suggested By 1,Suggested By 2,Suggested By 3,Notes,Archive Link
 
 with open(file, newline='') as csvfile:
     trackreader = csv.DictReader(csvfile)
@@ -41,9 +42,10 @@ with open(file, newline='') as csvfile:
 
         if theme.lower() not in shows:
             # insert show into database
-            showInsert = "INSERT INTO shows (id, theme, airdate) VALUES (%s, %s, %s)"
+            print("inserting show: " + theme)
+            showInsert = "INSERT INTO shows (id, theme, airdate, archivelink) VALUES (%s, %s, %s, %s)"
             try:
-                mycursor.execute(showInsert, (show_id, theme, row['Date Played'].strip()))
+                mycursor.execute(showInsert, (show_id, theme, row['Date Played'].strip(), row['Archive Link'].strip()))
                 mydb.commit()
                 shows[theme.lower()] = show_id
             except mysql.connector.IntegrityError as e:
