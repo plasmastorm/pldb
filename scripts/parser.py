@@ -42,7 +42,6 @@ with open(file, newline='') as csvfile:
 
         if theme.lower() not in shows:
             # insert show into database
-            print("inserting show: " + theme)
             showInsert = "INSERT INTO shows (id, theme, airdate, archivelink) VALUES (%s, %s, %s, %s)"
             try:
                 mycursor.execute(showInsert, (show_id, theme, row['Date Played'].strip(), row['Archive Link'].strip()))
