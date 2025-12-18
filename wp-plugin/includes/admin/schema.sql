@@ -1,4 +1,4 @@
--- IMPORTANT: This file is duplicated in wp-plugin/includes/admin/schema.sql
+-- IMPORTANT: This file is duplicated from initdb.d/pldb-schema.sql
 -- Any changes made here must also be applied to that file
 
 CREATE TABLE artists (

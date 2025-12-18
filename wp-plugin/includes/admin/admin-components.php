@@ -245,10 +245,9 @@ function pldb_render_playlist_table($plays_data = [], $mode = 'edit') {
 
 // Handle CSV upload processing
 function pldb_admin_handle_csv_upload($files, $post_data) {
-    $parser = plugin_dir_path(__FILE__).'pages/admin-parser.php';
+    $parser = plugin_dir_path(__FILE__).'admin-parser.php';
     if (file_exists($parser)) {
         require_once $parser;
-
         if (function_exists('pldb_parse_csv_upload')) {
             return pldb_parse_csv_upload($files, $post_data);
         } else {

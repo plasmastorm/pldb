@@ -35,33 +35,33 @@ function pldb_build_pagination($total, $per_page, $page, $base_url, $param = 'pl
 
     $params = $_GET;
     unset($params[$param]);
-    $html = '<div class="pldb-pagination">';
+    $html = '<nav aria-label="Pagination" class="pldb-pagination">';
 
     if ($page > 1) {
         $prev = add_query_arg(array_merge($params, [$param => $page - 1]), $base_url);
-        $html .= '<a href="'.esc_url($prev).'" class="pldb-page-link">« Previous</a>';
+        $html .= '<a href="'.esc_url($prev).'" class="pldb-page-link" aria-label="Go to previous page">« Previous</a>';
     }
 
     for ($i = 1; $i <= $pages; $i++) {
         $show = ($i == 1 || $i == $pages || ($i >= $page - $range && $i <= $page + $range));
         if ($show) {
             if ($i == $page) {
-                $html .= '<span class="pldb-page-current">'.$i.'</span>';
+                $html .= '<span class="pldb-page-current" aria-current="page">'.$i.'</span>';
             } else {
                 $url = add_query_arg(array_merge($params, [$param => $i]), $base_url);
-                $html .= '<a href="'.esc_url($url).'" class="pldb-page-link">'.$i.'</a>';
+                $html .= '<a href="'.esc_url($url).'" class="pldb-page-link" aria-label="Go to page '.$i.'">'.$i.'</a>';
             }
         } elseif ($i == $page - $range - 1 || $i == $page + $range + 1) {
-            $html .= '<span class="pldb-page-ellipsis">...</span>';
+            $html .= '<span class="pldb-page-ellipsis" aria-hidden="true">...</span>';
         }
     }
 
     if ($page < $pages) {
         $next = add_query_arg(array_merge($params, [$param => $page + 1]), $base_url);
-        $html .= '<a href="'.esc_url($next).'" class="pldb-page-link">Next »</a>';
+        $html .= '<a href="'.esc_url($next).'" class="pldb-page-link" aria-label="Go to next page">Next »</a>';
     }
 
-    $html .= '</div>';
+    $html .= '</nav>';
     return $html;
 }
 
@@ -86,7 +86,8 @@ function pldb_generate_link($type, $value, $row) {
 
         case 'show_archive':
             if ($row->archivelink) {
-                return '<a href="'.esc_url($row->archivelink).'" target="_blank" rel="noopener noreferrer">'.esc_html($value).' ↗</a>';
+                $label = esc_attr($value.' (opens in new tab)');
+                return '<a href="'.esc_url($row->archivelink).'" target="_blank" rel="noopener noreferrer" aria-label="'.$label.'">'.esc_html($value).' ↗</a>';
             }
             return false;
 
@@ -111,21 +112,32 @@ function pldb_build_html_table($columns, $data, $title = '', $total = null, $pag
     }
 
     $html = '';
+
+    $html .= '<table class="pldb-table">';
+    
     if ($title) {
         $display = $paged ? " ({$start}-{$end} of {$count})" : " ({$count})";
-        $html .= '<h3>'.esc_html($title.$display).'</h3>';
+        $html .= '<caption>'.esc_html($title.$display).'</caption>';
     }
 
-    $html .= '<table class="pldb-table"><thead><tr>';
+    $html .= '<thead><tr>';
     foreach ($columns as $k => $info) {
         $label = is_array($info) ? $info['label'] : $info;
         $sortable = is_array($info) && isset($info['sortable']) && $info['sortable'];
-        $html .= '<th>';
+        $aria_sort = '';
+        if ($sortable && $field === $k) {
+            $aria_sort = ' aria-sort="'.($dir === 'asc' ? 'ascending' : 'descending').'"';
+        }
+        $html .= '<th scope="col"'.$aria_sort.'>';
         if ($sortable) {
             $new_dir = ($field === $k && $dir === 'asc') ? 'desc' : 'asc';
             $href = add_query_arg([$sort_p => $k, $dir_p => $new_dir], pldb_get_base_url([$sort_p, $dir_p]));
             $current = ($field === $k) ? $dir : '';
-            $html .= '<a href="'.esc_url($href).'" class="pldb-sort"'.($current ? ' data-dir="'.esc_attr($current).'"' : '').'>'.esc_html($label).'</a>';
+            $label_text = 'Sort by '.esc_attr($label);
+            if ($current) {
+                $label_text .= ' (currently '.($dir === 'asc' ? 'ascending' : 'descending').', click to sort '.($new_dir === 'asc' ? 'ascending' : 'descending').')';
+            }
+            $html .= '<a href="'.esc_url($href).'" class="pldb-sort" aria-label="'.esc_attr($label_text).'"'.($current ? ' data-dir="'.esc_attr($current).'"' : '').'>'.esc_html($label).'</a>';
         } else {
             $html .= esc_html($label);
         }
@@ -171,11 +183,7 @@ function pldb_normalize_suggester_display($results, $field) {
     if (!$results) return;
     foreach ($results as $result) {
         if ($result->$field) {
-            $entries = explode('|||', $result->$field);
-            $norm = [];
-            foreach ($entries as $entry) {
-                $norm = array_merge($norm, pldb_process_suggesters($entry));
-            }
+            $norm = pldb_process_suggesters($result->$field);
             $result->$field = implode(', ', array_unique($norm));
         }
     }

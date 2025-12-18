@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) exit;
 function pldb_display_search_shortcode($atts, $db) {
     $title = $atts['title'];
 
-    $html = '<div class="pldb-search-form"><form method="get" action="">';
+    $html = '<div class="pldb-search-form"><form method="get" action="" role="search">';
 
     if (isset($_GET['p'])) {
         $html .= '<input type="hidden" name="p" value="'.esc_attr($_GET['p']).'">';
@@ -15,8 +15,9 @@ function pldb_display_search_shortcode($atts, $db) {
 
     $html .= '<h2>'.esc_html($title).'</h2>';
     $html .= '<div class="pldb-search-container">';
-    $html .= '<input type="text" name="pldb_search" class="pldb-search-input" placeholder="Search artists, tracks, or suggesters..." value="'.(isset($_GET['pldb_search']) ? esc_attr($_GET['pldb_search']) : '').'">';
-    $html .= '<button type="submit" class="pldb-search-button"><span class="dashicons dashicons-search"></span></button>';
+    $html .= '<label for="pldb-search-input" class="screen-reader-text">Search artists, tracks, or suggesters</label>';
+    $html .= '<input type="text" id="pldb-search-input" name="pldb_search" class="pldb-search-input" placeholder="Search artists, tracks, or suggesters..." value="'.(isset($_GET['pldb_search']) ? esc_attr($_GET['pldb_search']) : '').'">';
+    $html .= '<button type="submit" class="pldb-search-button"><span class="dashicons dashicons-search" aria-hidden="true"></span><span class="screen-reader-text">Search</span></button>';
     $html .= '</div></form></div>';
 
     if (!empty($_GET['pldb_search'])) {
@@ -38,7 +39,7 @@ function pldb_search_artists($db, $search) {
     $results = $db->get_results($db->prepare("
         SELECT
             a.name as artist,
-            COUNT(t.id) as tracks,
+            COUNT(DISTINCT t.id) as tracks,
             COUNT(p.id) as plays
         FROM artists a
         LEFT JOIN tracks t ON a.id = t.artist_id
@@ -184,24 +185,28 @@ function pldb_get_artist_tracks($db, $name) {
     $like = '%'.$db->esc_like($name).'%';
 
     $tracks = $db->get_results($db->prepare("
-        SELECT DISTINCT
+        SELECT 
             t.title as track,
-            s.theme as `show`,
+            GROUP_CONCAT(DISTINCT s.theme ORDER BY s.id SEPARATOR ', ') as `show`,
+            GROUP_CONCAT(DISTINCT p.suggesters ORDER BY p.id SEPARATOR ', ') as suggesters,
             COUNT(p.id) as plays
         FROM tracks t
         JOIN artists a ON t.artist_id = a.id
         LEFT JOIN plays p ON t.id = p.track_id
         LEFT JOIN shows s ON p.show_id = s.id
         WHERE a.name LIKE %s
-        GROUP BY t.id, t.title, s.theme
+        GROUP BY t.id, t.title
         ORDER BY plays DESC, t.title ASC
     ", $like));
 
     if (!$tracks) return '';
 
+    pldb_normalize_suggester_display($tracks, 'suggesters');
+
     $cols = [
         'track' => ['label' => 'Track', 'link_type' => 'track_search'],
         'show' => 'Show',
+        'suggesters' => ['label' => 'Suggesters', 'link_type' => 'suggester_list'],
         'plays' => 'Plays'
     ];
 
@@ -235,3 +240,4 @@ function pldb_search_shows($db, $search) {
 
     return pldb_build_html_table($cols, $results, 'Shows', null, 1, 20, 'search_shows');
 }
+

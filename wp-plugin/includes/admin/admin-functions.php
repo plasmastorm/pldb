@@ -152,6 +152,7 @@ function pldb_admin_get_show_plays($show_id) {
     $db = pldb_admin_get_db();
     if (!$db) return array();
 
+    // Include the artist's total tracks so we can warn if an artist would be removed on edit
     $results = $db->get_results($db->prepare("
         SELECT
             p.id,

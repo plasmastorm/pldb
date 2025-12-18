@@ -4,18 +4,6 @@ if (!defined('ABSPATH')) exit;
 $msg = '';
 $msg_type = '';
 
-// Handle CSV upload
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pldb_upload_csv'])) {
-    try {
-        $result = pldb_admin_handle_csv_upload($_FILES, $_POST);
-        $msg = $result['message'];
-        $msg_type = $result['type'];
-    } catch (Exception $e) {
-        $msg = 'CSV upload failed: ' . $e->getMessage();
-        $msg_type = 'error';
-    }
-}
-
 // Handle manual form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pldb_create_show'])) {
     try {
@@ -54,22 +42,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pldb_create_show'])) 
     <h1>Add New Show</h1>
 
     <?php pldb_render_admin_notice($msg, $msg_type); ?>
-
-    <div style="margin-bottom: 30px; padding: 15px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px;">
-        <form method="post" action="" enctype="multipart/form-data" style="display: flex; align-items: center; gap: 10px;">
-            <label for="pldb_csv_upload" style="margin: 0;"><strong>Upload CSV:</strong></label>
-            <input type="file"
-                   name="pldb_csv_upload"
-                   id="pldb_csv_upload"
-                   accept=".csv"
-                   required>
-            <?php submit_button('Upload', 'secondary', 'pldb_upload_csv', false); ?>
-        </form>
-    </div>
-
-    <hr style="margin: 30px 0;">
-
-    <h2>Or Add Show Manually</h2>
 
     <form method="post" action="" id="pldb-add-show-form">
         <h3>Show Details</h3>
