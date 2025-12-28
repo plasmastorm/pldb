@@ -47,7 +47,7 @@ function get_artist_id($conn, $name){
   } else {
     $name2 = "The " . $name;
   }
-  $query = "SELECT id FROM artists WHERE name IN (?, ?)";
+  $query = "SELECT id FROM artists WHERE name IN (?, ?) ORDER BY id";
   $stmt = mysqli_prepare($conn, $query);
   mysqli_stmt_bind_param($stmt, "ss", $name, $name2);
   mysqli_stmt_execute($stmt);
