@@ -39,12 +39,27 @@ function insert_new_show($conn, $id, $theme, $airdate, $archive_link){
 
 // returns artist_id
 function get_artist_id($conn, $name){
-  $query = "SELECT id FROM artists WHERE name = ?";
+  // lazy check for bands which may or may not have "The " at the beginning
+  // check for both "Band Name" and "The Band Name"
+  // works for "The The"
+  if (str_starts_with($name, "The ")){
+    $name2 = substr($name, 4);
+  } else {
+    $name2 = "The " . $name;
+  }
+  $query = "SELECT id FROM artists WHERE name IN (?, ?)";
   $stmt = mysqli_prepare($conn, $query);
-  mysqli_stmt_bind_param($stmt, "s", $name);
+  mysqli_stmt_bind_param($stmt, "ss", $name, $name2);
   mysqli_stmt_execute($stmt);
+  mysqli_stmt_store_result($stmt);
 
-  /* bind result variables */
+  // simple error message for when we get multiple rows, user will need to investigate themselves
+  $row_count = mysqli_stmt_num_rows($stmt);
+  if ($row_count > 1) {
+    print("Multiple artist rows for " . $name . "\n");
+  }
+  
+  // return the first or only result in the set
   mysqli_stmt_bind_result($stmt, $id);
 
   mysqli_stmt_fetch($stmt);
@@ -111,6 +126,4 @@ function insert_new_play($conn, $show_id, $track_id, $suggesters, $comment){
   mysqli_stmt_close($stmt);
   return mysqli_insert_id($conn);
 }
-
-
 ?>

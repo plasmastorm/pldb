@@ -5,8 +5,8 @@
 /*  [0] => Episode No.
     [1] => Date Played
     [2] => Show Title
-    [3] => Title
-    [4] => Artist
+    [3] => Artist*
+    [4] => Title*
     [5] => Year
     [6] => Suggested By 1
     [7] => Suggested By 2
@@ -64,15 +64,15 @@ while ($arr = fgetcsv($file, escape: "")) {
   }
 
   // check artist exists
-  $artist_id = get_artist_id($conn, trim($arr[4]));
+  $artist_id = get_artist_id($conn, trim($arr[3]));
   if (!isset($artist_id)){
-    $artist_id = insert_new_artist($conn, trim($arr[4]));
+    $artist_id = insert_new_artist($conn, trim($arr[3]));
   }
   
   // check track exists
-  $track_id = get_track_id($conn, $artist_id, trim($arr[3]));
+  $track_id = get_track_id($conn, $artist_id, trim($arr[4]));
   if (!isset($track_id)){
-    $track_id = insert_new_track($conn, $artist_id, trim($arr[3]), $arr[5]);
+    $track_id = insert_new_track($conn, $artist_id, trim($arr[4]), $arr[5]);
   }
   
   // check play exists (track->show)
