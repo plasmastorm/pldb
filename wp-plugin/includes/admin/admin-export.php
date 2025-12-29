@@ -25,7 +25,7 @@ function pldb_admin_export_csv() {
         JOIN shows s ON p.show_id = s.id
         JOIN tracks t ON p.track_id = t.id
         JOIN artists a ON t.artist_id = a.id
-        ORDER BY s.id DESC, p.id
+        ORDER BY s.id ASC, p.id
     ");
 
     // Set headers for CSV download
@@ -52,12 +52,17 @@ function pldb_admin_export_csv() {
     ], escape: '');
 
     // Write data rows
+    $last_show_id = null;
     foreach ($results as $row) {
         // Split suggesters into 3 columns
         $suggesters = array_filter(array_map('trim', explode(',', $row->suggesters)));
         $sug1 = isset($suggesters[0]) ? $suggesters[0] : '';
         $sug2 = isset($suggesters[1]) ? $suggesters[1] : '';
         $sug3 = isset($suggesters[2]) ? $suggesters[2] : '';
+
+        // Only include archive link on first row of each show
+        $archive_link = ($row->episode_no !== $last_show_id) ? $row->archivelink : '';
+        $last_show_id = $row->episode_no;
 
         fputcsv($output, [
             $row->episode_no,
@@ -70,7 +75,7 @@ function pldb_admin_export_csv() {
             $sug2,
             $sug3,
             $row->comment,
-            $row->archivelink
+            $archive_link
         ], escape: '');
     }
 

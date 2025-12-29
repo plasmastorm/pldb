@@ -4,12 +4,6 @@ if (!defined('ABSPATH')) exit;
 $msg = '';
 $msg_type = '';
 
-// Handle CSV export
-if (isset($_GET['action']) && $_GET['action'] === 'export_csv') {
-    pldb_admin_export_csv();
-    exit;
-}
-
 // Handle CSV upload
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pldb_upload_csv'])) {
     try {

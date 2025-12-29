@@ -182,8 +182,6 @@ function pldb_get_suggester_tracks($db, $name) {
 }
 
 function pldb_get_artist_tracks($db, $name) {
-    $like = '%'.$db->esc_like($name).'%';
-
     $tracks = $db->get_results($db->prepare("
         SELECT 
             t.title as track,
@@ -194,10 +192,10 @@ function pldb_get_artist_tracks($db, $name) {
         JOIN artists a ON t.artist_id = a.id
         LEFT JOIN plays p ON t.id = p.track_id
         LEFT JOIN shows s ON p.show_id = s.id
-        WHERE a.name LIKE %s
+        WHERE a.name = %s
         GROUP BY t.id, t.title
         ORDER BY plays DESC, t.title ASC
-    ", $like));
+    ", $name));
 
     if (!$tracks) return '';
 

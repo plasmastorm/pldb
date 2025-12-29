@@ -25,6 +25,16 @@ function pldb_admin_menu() {
 }
 add_action('admin_menu', 'pldb_admin_menu');
 
+// Handle CSV export before any output
+function pldb_handle_export() {
+    if (isset($_GET['page']) && $_GET['page'] === 'pldb-import-export' && 
+        isset($_GET['action']) && $_GET['action'] === 'export_csv') {
+        pldb_admin_export_csv();
+        exit;
+    }
+}
+add_action('admin_init', 'pldb_handle_export');
+
 // Load and display the edit show page
 function pldb_admin_edit_show_page() {
     require_once plugin_dir_path(__FILE__) . 'pages/edit-show.php';
