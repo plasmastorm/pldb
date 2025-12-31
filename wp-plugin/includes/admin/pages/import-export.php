@@ -4,6 +4,16 @@ if (!defined('ABSPATH')) exit;
 $msg = '';
 $msg_type = '';
 
+// save db config
+if (isset($_POST['pldb_save'])) {
+    update_option('pldb_host', $_POST['pldb_host']);
+    update_option('pldb_name', $_POST['pldb_name']);
+    update_option('pldb_user', $_POST['pldb_user']);
+    update_option('pldb_password', $_POST['pldb_password']);
+    $msg = 'Settings saved';
+    $msg_type = 'success';
+}
+
 // Handle CSV upload
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pldb_upload_csv'])) {
     try {
@@ -79,4 +89,29 @@ $db = $pldb_instance->get_external_db();
     <?php else: ?>
         <p style="color: #d63638;">Database connection failed</p>
     <?php endif; ?>
+
+    <hr style="margin: 40px 0;">
+
+    <h2>Database Configuration</h2>
+    <form method="post">
+        <table class="form-table">
+            <tr>
+                <th>Host</th>
+                <td><input type="text" name="pldb_host" value="<?= get_option('pldb_host') ?>" class="regular-text"></td>
+            </tr>
+            <tr>
+                <th>Database</th>
+                <td><input type="text" name="pldb_name" value="<?php echo get_option('pldb_name') ?>" class="regular-text"></td>
+            </tr>
+            <tr>
+                <th>User</th>
+                <td><input type="text" name="pldb_user" value="<?= get_option('pldb_user') ?>" class="regular-text"></td>
+            </tr>
+            <tr>
+                <th>Password</th>
+                <td><input type="password" name="pldb_password" value="<?php echo get_option('pldb_password'); ?>" class="regular-text"></td>
+            </tr>
+        </table>
+        <p><input type="submit" name="pldb_save" class="button button-primary" value="Save"></p>
+    </form>
 </div>

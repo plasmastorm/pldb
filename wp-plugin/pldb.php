@@ -44,12 +44,17 @@ class PLDB {
     public function get_external_db() {
         if ($this->external_db) return $this->external_db;
 
-        if (!defined('PLDB_HOST') || !defined('PLDB_NAME') || !defined('PLDB_USER') || !defined('PLDB_PASSWORD')) {
-            error_log('PLDB configuration missing');
+        $host = get_option('pldb_host');
+        $name = get_option('pldb_name');
+        $user = get_option('pldb_user');
+        $pass = get_option('pldb_password');
+        
+        if (!$host || !$name || !$user) {
+            error_log('PLDB config missing');
             return false;
         }
 
-        $this->external_db = new wpdb(PLDB_USER, PLDB_PASSWORD, PLDB_NAME, PLDB_HOST);
+        $this->external_db = new wpdb($user, $pass, $name, $host);
 
         if ($this->external_db->last_error) {
             error_log('PLDB connection failed: '.$this->external_db->last_error);
