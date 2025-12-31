@@ -47,7 +47,7 @@ function pldb_display_suggesters_shortcode($atts, $db) {
 
     $cols = [
         'suggester' => ['label' => 'Suggester', 'sortable' => true, 'link_type' => 'suggester_search'],
-        'tracks' => ['label' => 'Tracks Suggested', 'sortable' => true]
+        'tracks' => ['label' => 'Suggestions Played', 'sortable' => true]
     ];
 
     $html = pldb_build_html_table($cols, $paged, $title, $total, $page, $per_page, 'suggesters');

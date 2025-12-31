@@ -129,7 +129,7 @@ function pldb_search_suggesters($db, $search) {
 
     $cols = [
         'suggester' => ['label' => 'Suggester', 'link_type' => 'suggester_search'],
-        'tracks' => 'Tracks Suggested'
+        'tracks' => 'Suggestions Played'
     ];
 
     $html .= pldb_build_html_table($cols, $results, 'Suggesters', null, 1, 20, 'search_suggesters');
@@ -178,7 +178,7 @@ function pldb_get_suggester_tracks($db, $name) {
         'show' => 'Show'
     ];
 
-    return pldb_build_html_table($cols, $filtered, 'Tracks suggested by '.$name, null, 1, 100);
+    return pldb_build_html_table($cols, $filtered, 'Suggestions by '.$name.' played', null, 1, 100);
 }
 
 function pldb_get_artist_tracks($db, $name) {

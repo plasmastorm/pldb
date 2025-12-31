@@ -120,7 +120,7 @@ function pldb_parse_csv_upload($files, $post_data) {
 
             $play_id = get_play_id($db, $show_id, $track_id);
             if (!isset($play_id)){
-                $suggesters = implode(',', array_filter(array_slice($arr, 6, 3)));
+                $suggesters = strtolower(implode(',', array_filter(array_slice($arr, 6, 3))));
                 insert_new_play($db, $show_id, $track_id, $suggesters, $arr[9]);
                 $plays_created++;
             }
