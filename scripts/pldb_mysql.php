@@ -12,6 +12,7 @@ function get_all_show_ids($conn){
   return $rows;
 }
 
+// returns show_id based on theme text
 function get_show_id($conn, $theme){
   /* create a prepared statement */
   $stmt = mysqli_prepare($conn, "SELECT id FROM shows WHERE theme = ?");
@@ -42,14 +43,31 @@ function get_artist_id($conn, $name){
   // lazy check for bands which may or may not have "The " at the beginning
   // check for both "Band Name" and "The Band Name"
   // works for "The The"
-  if (str_starts_with($name, "The ")){
+  if (str_starts_with(strtolower($name), "the ")){
     $name2 = substr($name, 4);
   } else {
     $name2 = "The " . $name;
   }
-  $query = "SELECT id FROM artists WHERE name IN (?, ?) ORDER BY id";
+
+  // lazy check for and/&
+  // $name3 and $name4 end up being lowercase; doesn't matter in the database query
+  // but PHP string functions are case sensitive
+  if (str_contains(strtolower($name), " and ")) {
+    $name3 = str_ireplace(" and ", " & ", $name);
+    $name4 = str_ireplace(" and ", " & ", $name2);
+  } elseif (str_contains(strtolower($name), " & ")) {
+    $name3 = str_ireplace(" & ", " and ", $name);
+    $name4 = str_ireplace(" & ", " and ", $name2);
+  } else {
+    // if there are no replacements of and/& to name, just repeat $name for the other variables
+    // it's redundant but doesn't change the query result
+    $name3 = $name;
+    $name4 = $name;
+  }
+
+  $query = "SELECT id FROM artists WHERE name IN (?, ?, ?, ?) ORDER BY id";
   $stmt = mysqli_prepare($conn, $query);
-  mysqli_stmt_bind_param($stmt, "ss", $name, $name2);
+  mysqli_stmt_bind_param($stmt, "ssss", $name, $name2, $name3, $name4);
   mysqli_stmt_execute($stmt);
   mysqli_stmt_store_result($stmt);
 
