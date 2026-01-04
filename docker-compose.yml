@@ -1,13 +1,4 @@
 services:
-    web:
-        image: playlistdb/php
-        build: ./
-        volumes:
-            - ./html:/var/www/html
-        ports:
-            - 8080:80
-        networks:
-            - backend
 
     wp:
         image: playlistdb/php
@@ -15,6 +6,7 @@ services:
         volumes:
             - ./wordpress:/var/www/html
             - ./wp-plugin:/var/www/html/wp-content/plugins/pldb
+            - ./wp-page-import.xml:/tmp/import.xml:ro
         ports:
             - 8082:80
         networks:
