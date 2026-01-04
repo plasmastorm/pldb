@@ -108,12 +108,22 @@ function pldb_search_suggesters($db, $search) {
     ", $like));
 
     $tracks = [];
+    $names = [];
     if ($plays) {
         foreach ($plays as $p) {
             foreach (pldb_process_suggesters($p->suggesters) as $n) {
                 if (stripos($n, $search) !== false) {
-                    if (!isset($tracks[$n])) $tracks[$n] = [];
-                    $tracks[$n][$p->track_id] = true;
+                    $lower = strtolower($n);
+                    
+                    // prefer capitalised version over lowercase
+                    if (!isset($names[$lower])) {
+                        $names[$lower] = $n;
+                    } elseif ($names[$lower] === $lower && $n !== $lower) {
+                        $names[$lower] = $n;
+                    }
+                    
+                    if (!isset($tracks[$lower])) $tracks[$lower] = [];
+                    $tracks[$lower][$p->track_id] = true;
                 }
             }
         }
@@ -123,8 +133,8 @@ function pldb_search_suggesters($db, $search) {
 
     $html = '';
     $results = [];
-    foreach ($tracks as $n => $ids) {
-        $results[] = (object)['suggester' => $n, 'tracks' => count($ids)];
+    foreach ($tracks as $key => $ids) {
+        $results[] = (object)['suggester' => $names[$key], 'tracks' => count($ids)];
     }
 
     $cols = [
@@ -134,8 +144,8 @@ function pldb_search_suggesters($db, $search) {
 
     $html .= pldb_build_html_table($cols, $results, 'Suggesters', null, 1, 20, 'search_suggesters');
 
-    foreach ($tracks as $n => $ids) {
-        $html .= pldb_get_suggester_tracks($db, $n);
+    foreach ($tracks as $key => $ids) {
+        $html .= pldb_get_suggester_tracks($db, $names[$key]);
     }
 
     return $html;
@@ -149,6 +159,7 @@ function pldb_get_suggester_tracks($db, $name) {
             t.title as track,
             a.name as artist,
             s.theme as `show`,
+            s.archivelink,
             p.suggesters
         FROM plays p
         JOIN tracks t ON p.track_id = t.id
@@ -161,11 +172,20 @@ function pldb_get_suggester_tracks($db, $name) {
     $filtered = [];
     foreach ($plays as $pl) {
         $names = pldb_process_suggesters($pl->suggesters);
-        if (in_array($name, $names, true)) {
+        // case-insensitive comparison to match suggesters with any capitalisation
+        $matched = false;
+        foreach ($names as $n) {
+            if (strcasecmp($name, $n) === 0) {
+                $matched = true;
+                break;
+            }
+        }
+        if ($matched) {
             $filtered[] = (object)[
                 'track' => $pl->track,
                 'artist' => $pl->artist,
-                'show' => $pl->show
+                'show' => $pl->show,
+                'archivelink' => $pl->archivelink
             ];
         }
     }
@@ -175,7 +195,7 @@ function pldb_get_suggester_tracks($db, $name) {
     $cols = [
         'track' => ['label' => 'Track', 'link_type' => 'track_search'],
         'artist' => ['label' => 'Artist', 'link_type' => 'artist_search'],
-        'show' => 'Show'
+        'show' => ['label' => 'Show', 'link_type' => 'show_archive']
     ];
 
     return pldb_build_html_table($cols, $filtered, 'Suggestions by '.$name.' played', null, 1, 100);
@@ -186,6 +206,7 @@ function pldb_get_artist_tracks($db, $name) {
         SELECT 
             t.title as track,
             GROUP_CONCAT(DISTINCT s.theme ORDER BY s.id SEPARATOR ', ') as `show`,
+            GROUP_CONCAT(DISTINCT s.archivelink ORDER BY s.id SEPARATOR ', ') as show_archivelinks,
             GROUP_CONCAT(DISTINCT p.suggesters ORDER BY p.id SEPARATOR ', ') as suggesters,
             COUNT(p.id) as plays
         FROM tracks t
@@ -203,7 +224,7 @@ function pldb_get_artist_tracks($db, $name) {
 
     $cols = [
         'track' => ['label' => 'Track', 'link_type' => 'track_search'],
-        'show' => 'Show',
+        'show' => ['label' => 'Show', 'link_type' => 'show_list_archive'],
         'suggesters' => ['label' => 'Suggesters', 'link_type' => 'suggester_list'],
         'plays' => 'Plays'
     ];
