@@ -19,12 +19,29 @@ function get_artist_id($db, $name){
   // lazy check for bands which may or may not have "The " at the beginning
   // check for both "Band Name" and "The Band Name"
   // works for "The The"
-  if (str_starts_with($name, "The ")){
+  if (str_starts_with(strtolower($name), "the ")){
     $name2 = substr($name, 4);
   } else {
     $name2 = "The " . $name;
   }
-  $result = $db->get_results($db->prepare("SELECT id FROM artists WHERE name IN (%s, %s) ORDER BY id", $name, $name2));
+
+  // lazy check for and/&
+  // $name3 and $name4 end up being lowercase; doesn't matter in the database query
+  // but PHP string functions are case sensitive
+  if (str_contains(strtolower($name), " and ")) {
+    $name3 = str_ireplace(" and ", " & ", $name);
+    $name4 = str_ireplace(" and ", " & ", $name2);
+  } elseif (str_contains(strtolower($name), " & ")) {
+    $name3 = str_ireplace(" & ", " and ", $name);
+    $name4 = str_ireplace(" & ", " and ", $name2);
+  } else {
+    // if there are no replacements of and/& to name, just repeat $name for the other variables
+    // it's redundant but doesn't change the query result
+    $name3 = $name;
+    $name4 = $name;
+  }
+
+  $result = $db->get_results($db->prepare("SELECT id FROM artists WHERE name IN (%s, %s, %s, %s) ORDER BY id", $name, $name2, $name3, $name4));
   
   // simple error message for when we get multiple rows, user will need to investigate themselves
   if (count($result) > 1) {

@@ -2,7 +2,7 @@
 /*
 Plugin Name: #ThePlaylist Database Query
 Description: Connect to ThePlaylist database and query track/artist play statistics
-Version: 1.0.2
+Version: 1.0.3
 Author: #ThePlaylist
 Requires PHP: 8.0
 */

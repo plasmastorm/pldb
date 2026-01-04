@@ -91,6 +91,25 @@ function pldb_generate_link($type, $value, $row) {
             }
             return false;
 
+        case 'show_list_archive':
+            $themes = array_filter(array_map('trim', explode(', ', $value)));
+            $archivelinks = property_exists($row, 'show_archivelinks') && $row->show_archivelinks 
+                ? array_map('trim', explode(', ', $row->show_archivelinks)) 
+                : [];
+            
+            $links = [];
+            foreach ($themes as $i => $theme) {
+                $archivelink = isset($archivelinks[$i]) && $archivelinks[$i] !== '' ? $archivelinks[$i] : null;
+                
+                if ($archivelink) {
+                    $label = esc_attr($theme.' (opens in new tab)');
+                    $links[] = '<a href="'.esc_url($archivelink).'" target="_blank" rel="noopener noreferrer" aria-label="'.$label.'">'.esc_html($theme).' ↗</a>';
+                } else {
+                    $links[] = esc_html($theme);
+                }
+            }
+            return implode(', ', $links);
+
         default:
             return false;
     }
