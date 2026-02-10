@@ -1,7 +1,7 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-function pldb_admin_export_csv() {
+function pldb_export_csv() {
     global $pldb_instance;
     $db = $pldb_instance->get_external_db();
     
