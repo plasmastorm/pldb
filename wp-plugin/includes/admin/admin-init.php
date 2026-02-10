@@ -29,7 +29,8 @@ add_action('admin_menu', 'pldb_admin_menu');
 function pldb_handle_export() {
     if (isset($_GET['page']) && $_GET['page'] === 'pldb-import-export' && 
         isset($_GET['action']) && $_GET['action'] === 'export_csv') {
-        pldb_admin_export_csv();
+        require_once plugin_dir_path(__FILE__) . '../export.php';
+        pldb_export_csv();
         exit;
     }
 }

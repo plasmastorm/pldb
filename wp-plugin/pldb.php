@@ -34,6 +34,14 @@ class PLDB {
             add_shortcode($tag, [$this, 'render_shortcode_handler']);
         }
         add_action('wp_enqueue_scripts', [$this, 'enqueue_styles']);
+        add_action('init', [$this, 'handle_csv_export']);
+    }
+
+    public function handle_csv_export() {
+        if (isset($_GET['pldb_export']) && $_GET['pldb_export'] === 'csv') {
+            require_once plugin_dir_path(__FILE__).'includes/export.php';
+            pldb_export_csv();
+        }
     }
 
     public function enqueue_styles() {
