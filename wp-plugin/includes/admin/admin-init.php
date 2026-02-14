@@ -4,7 +4,6 @@ if (!defined('ABSPATH')) exit;
 // Load admin functions
 require_once plugin_dir_path(__FILE__) . 'admin-functions.php';
 require_once plugin_dir_path(__FILE__) . 'admin-components.php';
-require_once plugin_dir_path(__FILE__) . 'admin-export.php';
 
 // Register admin menu
 function pldb_admin_menu() {
